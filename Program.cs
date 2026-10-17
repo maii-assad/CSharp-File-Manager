@@ -11,43 +11,86 @@ namespace C_Fundamentals.ConsoleApp
             while (true)
             {
                 Console.WriteLine(">> ");
-                var input = Console.ReadLine().Trim();
+
+                var input = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(input))
+                    continue;
+
+                input = input.Trim();
+
                 var whiteSpaceIndex = input.IndexOf(' ');
-                var command = input.Substring(0, whiteSpaceIndex).ToLower();
-                var path = input.Substring(whiteSpaceIndex + 1).Trim();
+
+                var command = whiteSpaceIndex == -1
+                    ? input.ToLower()
+                    : input.Substring(0, whiteSpaceIndex).ToLower();
+
+                var path = whiteSpaceIndex == -1
+                    ? ""
+                    : input.Substring(whiteSpaceIndex + 1).Trim();
 
                 if (command == "read")
                 {
-                    var content = File.ReadAllText(path);
-                    Console.WriteLine(content);
+                    try
+                    {
+                        var content = File.ReadAllText(path);
+                        Console.WriteLine(content);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error: {ex.Message}");
+                    }
                 }
                 else if (command == "write")
                 {
-                    Console.WriteLine("Enter content to write:");
-                    var content = Console.ReadLine();
-                    File.WriteAllText(path, content);
-                    Console.WriteLine("Content written to file.");
+                    try
+                    {
+                        Console.WriteLine("Enter content to write:");
+                        var content = Console.ReadLine() ?? "";
+
+                        File.WriteAllText(path, content);
+
+                        Console.WriteLine("Content written to file.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error: {ex.Message}");
+                    }
                 }
                 else if (command == "append")
                 {
-                    Console.WriteLine("Enter content to append:");
-                    var content = Console.ReadLine();
-                    File.AppendAllText(path, content);
-                    Console.WriteLine("Content appended to file.");
-                }
-                else if (command == "list")
-                {
-                    foreach (var entry in Directory.GetFileSystemEntries(path))
+                    try
                     {
-                        Console.WriteLine($"\t [Dir] {entry}");
-                    }
-                    foreach (var entry in Directory.GetFiles(path))
-                    {
-                        Console.WriteLine($"\t [Files] {entry}");
-                    }
+                        Console.WriteLine("Enter content to append:");
+                        var content = Console.ReadLine() ?? "";
 
+                        File.AppendAllText(path, content);
+
+                        Console.WriteLine("Content appended to file.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error: {ex.Message}");
+                    }
                 }
-                else if (command == "Info")
+                else if (command == "remove")
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                        Console.WriteLine("File deleted successfully.");
+                    }
+                    else if (Directory.Exists(path))
+                    {
+                        Directory.Delete(path);
+                        Console.WriteLine("Directory deleted successfully.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("The specified path does not exist.");
+                    }
+                }
+                else if (command == "info")
                 {
                     if (Directory.Exists(path))
                     {
@@ -70,21 +113,38 @@ namespace C_Fundamentals.ConsoleApp
                 }
                 else if (command == "mkdir")
                 {
-                    Directory.CreateDirectory(path);
+                    try
+                    {
+                        Directory.CreateDirectory(path);
+                        Console.WriteLine("Directory created successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error: {ex.Message}");
+                    }
                 }
                 else if (command == "remove")
                 {
-                    if (File.Exists(path))
+                    try
                     {
-                        File.Delete(path);
+                        if (File.Exists(path))
+                        {
+                            File.Delete(path);
+                            Console.WriteLine("File deleted successfully.");
+                        }
+                        else if (Directory.Exists(path))
+                        {
+                            Directory.Delete(path);
+                            Console.WriteLine("Directory deleted successfully.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("The specified path does not exist.");
+                        }
                     }
-                    else if (Directory.Exists(path))
+                    catch (Exception ex)
                     {
-                        Directory.Delete(path);
-                    }
-                    else
-                    {
-                        Console.WriteLine("The specified path does not exist.");
+                        Console.WriteLine($"Error: {ex.Message}");
                     }
                 }
 
